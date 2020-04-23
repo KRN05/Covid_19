@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Covid_19_2</string>
+
+    <string-array name="spinner_states">
+        <item>All States</item>
+        <item>Andhra Pradesh</item>
+        <item>Assam</item>
+        <item>Bihar</item>
+        <item>Chandigarh</item>
+        <item>Madhya Pradesh</item>
+    </string-array>
+
+    <string-array name="spinner_category">
+        <item>All Categories</item>
+        <item>CoVID-19 Testing Lab</item>
+        <item>Free Food</item>
+        <item>Hospitals and Centers</item>
+    </string-array>
+    <string name="title_activity_maps">Map</string>
+
+</resources>
+
+
