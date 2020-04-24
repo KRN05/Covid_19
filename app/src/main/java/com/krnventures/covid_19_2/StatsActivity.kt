@@ -3,38 +3,31 @@ package com.krnventures.covid_19_2
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
-import androidx.annotation.Nullable
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.krnventures.covid_19_2.dto.TravelHistoryListDTO
 import com.krnventures.covid_19_2.dto.Travel_HistoryDTO
 import com.krnventures.covid_19_2.network.ApiInterface
-import kotlinx.coroutines.*
+import kotlinx.android.synthetic.main.activity_location.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import kotlin.collections.ArrayList
-import kotlin.coroutines.resumeWithException
 import kotlin.math.min
 
-class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+
+class StatsActivity : AppCompatActivity() {
 
 
-    private lateinit var mMap: GoogleMap
     private var mTravelLocations: MutableList<Travel_HistoryDTO> = ArrayList()
     private var minDistance: Double = 1000000000.0
     private var PERMISSION_ID = 1
@@ -42,60 +35,48 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     var mylat: Double = 0.0
     var mylung: Double = 0.0
     lateinit var strList1: List<String>
-    var googleMap: GoogleMap? = null
     var destinationLat: Double = 0.0
     var destinationLong: Double = 0.0
     private var locationName: String = " "
 
 
-    private val scope = CoroutineScope(Dispatchers.Default)
-    private lateinit var fetchJob: Job
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_maps)
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        setContentView(R.layout.activity_location)
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         getLastLocation()
 
-      //  apiCall(this)
-
-        fetchJob = scope.launch {
-            var result : TravelHistoryListDTO? = null
-            try {
-                result = apiCall()
-
-            } catch (t: Throwable) {
-                // do sth with error
-            }
-            result?.travel_history
-                .let { it?.let { it1 -> calculateDistancePart(it1) } }
-                .apply { mTravelLocations = result?.travel_history!! }
-
-        }
+        apiCall()
     }
 
-    private suspend fun apiCall() = suspendCancellableCoroutine<TravelHistoryListDTO> { cont ->
-        ApiInterface.create().getTravelHistory().enqueue(
+    fun apiCall() {
+        Log.i("timed", "2")
+
+        val apiInterface = ApiInterface.create().getTravelHistory()
+        apiInterface.enqueue(
             object : Callback<TravelHistoryListDTO> {
                 override fun onFailure(call: Call<TravelHistoryListDTO>, t: Throwable) {
                     Log.i("hithere2", "failure")
-                    cont.resumeWithException(t)
                 }
 
-                override fun onResponse(call: Call<TravelHistoryListDTO>, response: Response<TravelHistoryListDTO>) {
-                    cont.resumeWith(response.body())
+                override fun onResponse(
+                    call: Call<TravelHistoryListDTO>,
+                    response: Response<TravelHistoryListDTO>
+                ) {
+                    val travleLocations = response.body()
+                    Log.i("hithere", travleLocations.toString())
+
+                    mTravelLocations.addAll(travleLocations!!.travel_history!!)
+                    calculateDistancePart(mTravelLocations)
+
                 }
+
             }
         )
     }
 
-    private fun calculateDistancePart(mmTravel: MutableList<Travel_HistoryDTO>) {
+    fun calculateDistancePart(mmTravel: MutableList<Travel_HistoryDTO>) {
         for (items in mmTravel) {
             val siz: Int = items.latlong.toString().length
 
@@ -131,11 +112,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 locationName = items.address.toString()
             }
         }
-        Log.i("minDistance", minDistance.toString())
-        Log.i(
-            "minLatLung",
-            destinationLat.toString() + " " + destinationLong.toString()
-        )
+        minDistance = Math.round(minDistance * 100.0) / 100.0
+        txt_location.text = locationName
+        txt_distance.text =
+            String.format(resources.getString(R.string.location_distance), minDistance.toString());
+
+        val geoUri =
+            "http://maps.google.com/maps?q=loc:" + destinationLat.toString() + "," + destinationLong.toString() + " (" + locationName + ")"
+        button3.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(geoUri))
+            startActivity(intent)
+        }
     }
 
 
@@ -167,18 +154,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 dist = dist * 0.8684
             }
             dist
-        }
-    }
-
-    override fun onMapReady(googleMap: GoogleMap?) {
-        Log.i("bhaiproblem", "$destinationLat $destinationLong")
-        scope.launch {
-            fetchJob.join() // suspends the coroutine, does not block thread!
-            // use your variables as you wish here
-            // every variable is set because fetchJob has completed
-            val sydney = LatLng(destinationLat, destinationLong)
-            googleMap?.addMarker(MarkerOptions().position(sydney).title(locationName))
-            googleMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney, 15f))
         }
     }
 
@@ -250,12 +225,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             LocationManager.NETWORK_PROVIDER
         )
     }
-
-    private fun <T> CancellableContinuation<T>.resumeWith(result: TravelHistoryListDTO?) {
-        Log.i("haha", result.toString())
-        result?.travel_history?.let { calculateDistancePart(it) }
-    }
 }
+
 
 
 

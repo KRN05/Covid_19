@@ -3,18 +3,16 @@ package com.krnventures.covid_19_2
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.Button
 import android.widget.Spinner
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.krnventures.covid_19_2.adapters.EssentialsAdapter
 import com.krnventures.covid_19_2.dto.EssentialsDTO
 import com.krnventures.covid_19_2.dto.EssentialsListDTO
 import com.krnventures.covid_19_2.network.ApiInterface
+import kotlinx.android.synthetic.main.activity_main.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,11 +20,10 @@ import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 
-    private var mAdapter: EssentialsAdapter? = null;
+    private var mAdapter: EssentialsAdapter? = null
     private var mEssentials: MutableList<EssentialsDTO> = ArrayList()
     private var currentCategoryPosition = 0
     private var currentStatePosition = 0
-    private lateinit var recyclerView: RecyclerView
     private var currentState="All States"
     private var currentCategory="All Categories"
 
@@ -35,18 +32,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        recyclerView=findViewById(R.id.rv_essentials)
-        recyclerView.layoutManager = LinearLayoutManager(this)
+        rv_essentials.layoutManager = LinearLayoutManager(this)
 
+        setupStatesSpinner(spinner)
+        setupCategorySpinner(spinner2)
 
-        val ss: Spinner = findViewById(R.id.spinner)
-        val sc: Spinner = findViewById(R.id.spinner2)
-        setupStatesSpinner(ss)
-        setupCategorySpinner(sc)
-
-        val btn: Button = findViewById(R.id.buttonGo)
-        btn.setOnClickListener {
-            intent = Intent(applicationContext, MapsActivity::class.java)
+        buttonGo.setOnClickListener {
+            intent = Intent(applicationContext, StatsActivity::class.java)
             startActivity(intent)
         }
 
@@ -54,16 +46,15 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun apiCall() {
+    private fun apiCall() {
         mAdapter = EssentialsAdapter(this, mEssentials)
-        recyclerView.adapter = mAdapter
+        rv_essentials.adapter = mAdapter
 
         val apiInterface = ApiInterface.create().getEssentials()
 
         apiInterface.enqueue(
             object : Callback<EssentialsListDTO> {
                 override fun onFailure(call: Call<EssentialsListDTO>, t: Throwable) {
-                    Log.i("hithere", "failure")
                 }
 
                 override fun onResponse(
@@ -72,7 +63,6 @@ class MainActivity : AppCompatActivity() {
                 ) {
 
                     val essentialsItems = response.body()
-                    Log.i("hithere", essentialsItems.toString())
                     if (essentialsItems != null) {
                         mEssentials.addAll(essentialsItems.resources!!)
                         mAdapter!!.notifyDataSetChanged()
@@ -105,8 +95,8 @@ class MainActivity : AppCompatActivity() {
                 id: Long
             ) {
 
-                if(recyclerView.adapter!=null && currentStatePosition!=position) {
-                    (recyclerView.adapter as EssentialsAdapter).filterEssentials(essentialsStrings[position], currentCategory, currentStatePosition, currentCategoryPosition)
+                if(rv_essentials.adapter!=null && currentStatePosition!=position) {
+                    (rv_essentials.adapter as EssentialsAdapter).filterEssentials(essentialsStrings[position], currentCategory)
                     currentState=essentialsStrings[position]
                     currentStatePosition=position
                 }
@@ -137,8 +127,8 @@ class MainActivity : AppCompatActivity() {
                 id: Long
             ) {
 
-                if(recyclerView.adapter!=null && currentCategoryPosition!=position) {
-                    (recyclerView.adapter as EssentialsAdapter).filterEssentials(currentState, essentialsStrings[position], currentStatePosition,  currentCategoryPosition)
+                if(rv_essentials.adapter!=null && currentCategoryPosition!=position) {
+                    (rv_essentials.adapter as EssentialsAdapter).filterEssentials(currentState, essentialsStrings[position])
                     currentCategory=essentialsStrings[position]
                     currentCategoryPosition=position
                 }

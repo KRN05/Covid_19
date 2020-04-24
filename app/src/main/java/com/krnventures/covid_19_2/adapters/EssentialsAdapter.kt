@@ -1,7 +1,6 @@
 package com.krnventures.covid_19_2.adapters
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -28,7 +27,7 @@ class EssentialsAdapter(
         return MyViewHolder(view)
     }
 
-    fun filterEssentials(mStates: String, mCategory: String, sposition: Int, cposition: Int) {
+    fun filterEssentials(mStates: String, mCategory: String) {
 
         filtering = true
         // you are given a string of state from spinner, now tell recyclerview view that show these states only.
@@ -85,16 +84,16 @@ class EssentialsAdapter(
 
     class MyViewHolder(containerView: View) : RecyclerView.ViewHolder(containerView) {
 
-        val title = containerView.txt_essential_title;
-        val address = containerView.txt_essential_location;
-        val contact = containerView.txt_essential_contact;
+        val title = containerView.txt_essential_title
+        val address = containerView.txt_essential_location
+        val contact = containerView.txt_essential_contact
 
     }
 
-    fun clearFilter() {
-        filtering = false
-        //filteredEssentials.clear()
-    }
+//    fun clearFilter() {
+//        filtering = false
+//        //filteredEssentials.clear()
+//    }
 
 //    fun updateEssentials(photos : List<EssentialsDTO>) {
 //        DiffUtil.calculateDiff(EssentialsDiffCallback(photos, mEssentials), false).dispatchUpdatesTo(this)

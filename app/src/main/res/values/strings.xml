@@ -3,20 +3,55 @@
 
     <string-array name="spinner_states">
         <item>All States</item>
+        <item>Andaman &amp; Nicobar</item>
         <item>Andhra Pradesh</item>
+        <item>Chhattisgarh</item>
+        <item>Delhi</item>
+        <item>Goa</item>
+        <item>Gujarat</item>
+        <item>Haryana</item>
+        <item>Himachal Pradesh</item>
+        <item>Jammu &amp; Kashmir</item>
+        <item>Jharkhand</item>
+        <item>Karnataka</item>
+        <item>Kerala</item>
+        <item>Andhra Pradesh</item>
+        <item>Madhya Pradesh</item>
         <item>Assam</item>
         <item>Bihar</item>
         <item>Chandigarh</item>
-        <item>Madhya Pradesh</item>
+        <item>Maharashtra</item>
+        <item>Manipur</item>
+        <item>Meghalaya</item>
+
     </string-array>
 
     <string-array name="spinner_category">
         <item>All Categories</item>
+
+<!--        <item>Accommodation and Shelter maiHomes</item>-->
         <item>CoVID-19 Testing Lab</item>
-        <item>Free Food</item>
         <item>Hospitals and Centers</item>
+        <item>Ambulance</item>
+        <item>Government Helpline</item>
+        <item>Community Kitchen</item>
+        <item>Free Food</item>
+        <item>Fire Brigade</item>
+        <item>Fundraisers</item>
+        <item>Quarantine Facility</item>
+        <item>Police</item>
+        <item>Fundraisers</item>
+        <item>Transportation</item>
+
     </string-array>
+
+
     <string name="title_activity_maps">Map</string>
+    <string name="infected_location">Nearest infected location:</string>
+    <string name="location_name">TextView</string>
+    <string name="location_distance">It is %1$s km away from your location</string>
+    <string name="stats_data">See Infected Locations</string>
+    <string name="view_in_google_map">View in Google Map</string>
 
 </resources>
 
